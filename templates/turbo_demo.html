@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+  <head>
+
+<!--link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}"-->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='brat/css/style-vis.css') }}">
+
+<script src="{{ url_for('static', filename='brat/lib/head.load.min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/lib/jquery-1.7.1.min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/lib/mustache.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/lib/jquery-Mustache.js') }}" type="text/javascript"></script>
+<!--script src="{{ url_for('static', filename='js/compiled/semviz.js') }}" type="text/javascript"></script-->
+
+</head>
+
+<body>
+
+<div id="intro">
+<h1>TurboParser Demo</h1>
+<p>Here you can test <b><a href="http://www.ark.cs.cmu.edu/TurboParser/">TurboParser</a></b>. This demo performs tokenization, part-of-speech tagging, and syntactic dependency parsing.
+</div>
+
+{% from "_formhelpers.html" import render_field %}
+
+<form method=post action="/turbo_demo">
+  <dl>
+    {{ form.sentence(rows=3, cols=60, placeholder='Type a sentence.') }}
+    {{ render_field(form.language) }}
+  </dl>
+  <p><input type="submit" name="parse" value="Parse!"> <input type="submit" name="resolve_coreferences" value="Resolve coreferences"></p>
+  <h2>Entity Recognition</h2>
+  <p>{{ form.entity_tagged_sentence }}</p>
+  <h2>POS Tagging/Dependency Parsing</h2>
+  <p>
+    <ul>
+      <table>
+          {% for line in form.parsed_sentence.split('\n') %}
+          <tr>
+            {% for field in line.split('\t') %}
+            <td>{{ field }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </ul>
+    <div id="dependency_tree"></div>
+  </p>
+  <h2>Semantic Dependency Parsing</h2>
+  <p>
+    <ul>
+      <table>
+          {% for line in form.semantic_parsed_sentence.split('\n') %}
+          <tr>
+            {% for field in line.split('\t') %}
+            <td>{{ field }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </ul>
+    <div id="semantic_dependency_tree"></div>
+  </p>
+  <h2>Coreference Resolution</h2>
+  <p>
+    {% for sentence in form.decorated_coref_document %}
+      {% for word, entity, color in sentence %}
+        <span title="{{ entity }}"><font color="{{ color }}">{{ word }}</font></span> 
+      {% endfor %}
+      <br />
+    {% endfor %}
+  </p>
+  <p>
+    <ul>
+      <table>
+          {% for line in form.coref_document.split('\n') %}
+          <tr>
+            {% for field in line.split('\t') %}
+            <td>{{ field }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+      </table>
+    </ul>
+  </p>
+</form>
+
+
+<!-- override a few style-vis.css settings for the embedded version to make things larger -->
+<style type="text/css">
+text { font-size: 15px; }
+.span text { font-size: 10px; }
+.arcs text { font-size: 9px; }
+</style>
+
+<script type="text/javascript">
+    var bratLocation = "{{ url_for('static', filename='brat') }}";
+    head.js(
+        // External libraries
+        bratLocation + '/lib/jquery.svg.min.js',
+        bratLocation + '/lib/jquery.svgdom.min.js',
+
+        // brat helper modules
+        bratLocation + '/js/configuration.js',
+        bratLocation + '/js/util.js',
+        bratLocation + '/lib/webfont.js',
+
+        // brat modules
+        bratLocation + '/js/dispatcher.js',
+        bratLocation + '/js/url_monitor.js',
+        bratLocation + '/js/visualizer.js'
+    );
+
+    head.ready(function() {
+
+        //var collInput = '{}';
+        //var docInput = '{{ form.parsed_sentence_json|safe }}';
+        //console.log(docInput);
+
+        //var collData = JSON.parse(collInput);
+        //var docData = JSON.parse(docInput);
+        var collData = {}
+        var docData = {{ form.parsed_sentence_json|safe }};
+        //console.log(docData);
+
+        Util.embed(
+            // id of the div element where brat should embed the visualisations
+            'dependency_tree',
+            // object containing collection data
+            {},
+            // object containing document data
+            docData,
+            // Array containing locations of the visualisation fonts
+            []
+            );
+
+        var collData = {}
+        var docData = {{ form.semantic_parsed_sentence_json|safe }};
+
+        Util.embed(
+            // id of the div element where brat should embed the visualisations
+            'semantic_dependency_tree',
+            // object containing collection data
+            {},
+            // object containing document data
+            docData,
+            // Array containing locations of the visualisation fonts
+            []
+            );
+    });
+</script>
+
+<!--script type="text/javascript">
+    var bratLocation = "{{ url_for('static', filename='brat') }}";
+    head.js(
+        // External libraries
+        bratLocation + '/lib/jquery.svg.min.js',
+        bratLocation + '/lib/jquery.svgdom.min.js',
+
+        // brat helper modules
+        bratLocation + '/js/configuration.js',
+        bratLocation + '/js/util.js',
+        bratLocation + '/lib/webfont.js',
+
+        // brat modules
+        bratLocation + '/js/dispatcher.js',
+        bratLocation + '/js/url_monitor.js',
+        bratLocation + '/js/visualizer.js'
+    );
+
+    head.ready(function() {
+
+        var collData = {}
+        var docData = {{ form.semantic_parsed_sentence_json|safe }};
+
+        Util.embed(
+            // id of the div element where brat should embed the visualisations
+            'semantic_dependency_tree',
+            // object containing collection data
+            {},
+            // object containing document data
+            docData,
+            // Array containing locations of the visualisation fonts
+            []
+            );
+    });
+</script-->
+
+
+
+<!--script type="text/javascript">
+    var bratLocation = "{{ url_for('static', filename='brat') }}";
+    head.js(
+        // External libraries
+        bratLocation + '/client/lib/jquery.min.js',
+        bratLocation + '/client/lib/jquery.svg.min.js',
+        bratLocation + '/client/lib/jquery.svgdom.min.js',
+
+        // brat helper modules
+        bratLocation + '/client/src/configuration.js',
+        bratLocation + '/client/src/util.js',
+        bratLocation + '/client/src/annotation_log.js',
+        bratLocation + '/client/lib/webfont.js',
+
+        // brat modules
+        bratLocation + '/client/src/dispatcher.js',
+        bratLocation + '/client/src/url_monitor.js',
+        bratLocation + '/client/src/visualizer.js'
+    );
+
+//    var webFontURLs = [];
+
+    var webFontURLs = [
+        bratLocation + '/css/static/fonts/Astloch-Bold.ttf',
+        bratLocation + '/css/static/fonts/PT_Sans-Caption-Web-Regular.ttf',
+        bratLocation + '/css/static/fonts/Liberation_Sans-Regular.ttf'
+    ];
+
+    head.ready(function() {
+
+        var collInput = '{}';
+        var docInput = '{{ form.parsed_sentence_json|safe }}';
+        //console.log(docInput);
+
+        var collData = JSON.parse(collInput);
+        var docData = JSON.parse(docInput);
+        //console.log(docData);
+
+        Util.embed(
+            // id of the div element where brat should embed the visualisations
+            'dependency_tree',
+            // object containing collection data
+            {}, //collData,
+            // object containing document data
+            docData,
+            // Array containing locations of the visualisation fonts
+            [] //webFontURLs
+            );
+    });
+</script-->
+</body>
+</html>
