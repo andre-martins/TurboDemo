@@ -44,11 +44,15 @@ class TurboDemoForm(Form):
 def turbo_demo():
     form = TurboDemoForm(request.form)
     if request.method == 'POST' and form.validate():
-        text = form.sentence.data.encode('utf-8')
+        #text = form.sentence.data.encode('utf-8')
+        text = form.sentence.data # Problems in Spanish with 'A~nos. E'
         language = form.language.data
         print "Lock acquire"
         lock.acquire()
+        #import pdb
+        #pdb.set_trace()
         sentences = pipeline.split_sentences(text, language)
+        sentences = [s.encode('utf-8') for s in sentences] 
 
         entity_tagged_sentence = ''
         parsed_sentence = ''
