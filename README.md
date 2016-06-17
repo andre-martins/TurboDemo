@@ -4,9 +4,9 @@ A simple webapp in Flask that serves as a demo for [TurboParser](https://github.
 ## Installation instructions
 1. Download and install TurboParser (see link above).
 2. Install the Python wrapper for TurboParser (see link above).
-3. Install flask and flask-wtf (see http://flask.pocoo.org/):
+3. Install flask, flask-wtf, numpy and nltk with
 ```
-sudo pip install flask flask-wtf
+pip install -r requirements.txt
 ```
 4. Run the following commands, where <TurboParser> is the folder where TurboParser is installed:
 ```
