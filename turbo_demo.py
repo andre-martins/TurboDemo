@@ -23,15 +23,17 @@ class TurboDemoForm(Form):
     sentence = TextAreaField('Write the sentence here:',
                              [validators.Length(min=1, max=100000)])
     language = SelectField('Language:',
-                           choices=[('PT', 'Portuguese'),
-                                    ('ES', 'Spanish'),
+                           choices=[#('PT', 'Portuguese'),
+                                    #('ES', 'Spanish'),
                                     #('EN', 'English'),
-                                    ('EN-Nonprojective', 'English-Nonprojective'),
-                                    ('PT-BR-Universal', 'Brazilian Portuguese-Universal'),
+                                    #('EN-Nonprojective', 'English-Nonprojective'),
+                                    #('PT-BR-Universal', 'Brazilian Portuguese-Universal'),
+                                    #('DE-Universal', 'German-Universal'),
+                                    ('EN-Universal', 'English-Universal'),
+                                    ('PT-Universal', 'Portuguese-Universal'),
                                     ('ES-Universal', 'Spanish-Universal'),
                                     ('FR-Universal', 'French-Universal'),
-                                    ('IT-Universal', 'Italian-Universal'),
-                                    ('DE-Universal', 'German-Universal')])
+                                    ('IT-Universal', 'Italian-Universal')])
     entity_tagged_sentence = ''
     parsed_sentence = ''
     parsed_sentence_json = '{}'
@@ -86,7 +88,11 @@ def turbo_demo():
             else:
                 entity_tagged_sentence = ''
 
-            heads, deprels = pipeline.parse(tokenized_sentence, tags, lemmas, language)
+            # Currently, discard the lemmas when parsing.
+            # TODO: train models with predicted lemmas and predicted morph tags.
+            fake_lemmas = ['_' for lemma in lemmas]
+            heads, deprels = pipeline.parse(tokenized_sentence, tags, \
+                                            fake_lemmas, language)
             parsed_sentence = ''
             for i, token in enumerate(tokenized_sentence):
                 parsed_sentence += str(i+1) + '\t' + token + '\t' + lemmas[i] + \
